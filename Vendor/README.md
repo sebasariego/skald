@@ -1,12 +1,12 @@
 # Vendored tree-sitter sources
 
-Quill highlights code with the tree-sitter C runtime and one generated parser per
+Skald highlights code with the tree-sitter C runtime and one generated parser per
 language, compiled straight into the app. Nothing is fetched at build time and the app
 itself never touches the network.
 
 The upstream repositories are cloned into `Vendor/upstream/` (git-ignored), and
 `Scripts/vendor-tree-sitter.sh` copies exactly the files the build needs into
-`Quill/Vendor/` (committed) and the highlight queries into `Quill/Resources/Queries/`.
+`Skald/Vendor/` (committed) and the highlight queries into `Skald/Resources/Queries/`.
 
 ## 1. Clone upstream (run once, outside the sandbox)
 
@@ -36,7 +36,7 @@ XML (also .svg, .plist), JavaScript (also .jsx), TypeScript, TSX.
    symbol, optional shared-header dir, optional query files, optional injections file).
 3. Add one `LanguageDefinition` to `LanguageRegistry` and one entry to
    `TreeSitterSupport.grammarFunctions`.
-4. Run the script, then `Scripts/test-cli.sh QuillTests.TreeSitterParserTests`.
+4. Run the script, then `Scripts/test-cli.sh SkaldTests.TreeSitterParserTests`.
 
 `tree-sitter-swift` keeps its generated `parser.c` on the `with-generated-files`
 branch; the default branch has none.
@@ -66,17 +66,17 @@ them in the `GRAMMARS` order. For TSX the JSX file goes last, unlike upstream's
 every JSX tag.
 
 Repos with a shared `common/scanner.h` (XML, TypeScript) keep their `<grammar>/src`
-layout under `Quill/Vendor/Grammars/<name>/` so the `../../common` include resolves,
+layout under `Skald/Vendor/Grammars/<name>/` so the `../../common` include resolves,
 and the grammar's `tree_sitter/` headers are copied beside the shared header.
 
-Xcode compiles every `.c` file under `Quill/Vendor` as part of the app target. The Swift
+Xcode compiles every `.c` file under `Skald/Vendor` as part of the app target. The Swift
 grammar's `parser.c` is large, so the first build takes a while; later builds are
 incremental.
 
 ## Licenses
 
 All projects are MIT licensed (the ICU unicode headers inside the runtime carry their
-own license). The script copies each `LICENSE` into `Quill/Vendor/LICENSES/`.
+own license). The script copies each `LICENSE` into `Skald/Vendor/LICENSES/`.
 
 ## Injections
 

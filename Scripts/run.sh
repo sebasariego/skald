@@ -1,6 +1,6 @@
 #!/bin/zsh
-# Builds Skald with xcodebuild (Debug) into DerivedData/xcode, quits any running copy,
-# and launches the fresh build. Needs to run outside the Claude sandbox.
+# Dev loop: builds Skald (Debug) into DerivedData/xcode, quits any running copy,
+# and launches the build-folder copy. For the installed app use Scripts/install.sh.
 # Usage: Scripts/run.sh [--no-launch]
 set -euo pipefail
 cd "$(dirname "$0")/.."

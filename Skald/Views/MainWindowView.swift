@@ -55,16 +55,20 @@ struct MainWindowView: View {
             Alert(title: Text(error.title), message: Text(error.message))
         }
         .overlay(alignment: .top) {
-            if workspace.palette.isPresented {
-                ZStack(alignment: .top) {
+            ZStack(alignment: .top) {
+                if workspace.palette.isPresented {
                     Color.black.opacity(0.001)
                         .ignoresSafeArea()
                         .onTapGesture { workspace.palette.dismiss() }
+                        .transition(.opacity)
+                    // Quake-console style: drops out from under the toolbar and slides back up.
                     PaletteView(palette: workspace.palette)
-                        .padding(.top, 48)
+                        .padding(.top, 6)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                .transition(.opacity)
             }
+            .animation(.spring(duration: 0.28, bounce: 0.12), value: workspace.palette.isPresented)
+            .clipped()
         }
     }
 }

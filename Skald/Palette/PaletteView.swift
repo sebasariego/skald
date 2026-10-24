@@ -42,9 +42,10 @@ struct PaletteView: View {
                         .padding(.vertical, 4)
                     }
                     .frame(maxHeight: 360)
-                    .onChange(of: palette.selectedIndex) { _, index in
+                    .onChange(of: palette.keyboardSelectionVersion) { _, _ in
+                        let index = palette.selectedIndex
                         guard palette.results.indices.contains(index) else { return }
-                        proxy.scrollTo(palette.results[index].id, anchor: .center)
+                        proxy.scrollTo(palette.results[index].id, anchor: nil)
                     }
                 }
             }

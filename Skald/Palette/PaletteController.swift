@@ -13,6 +13,9 @@ final class PaletteController {
     }
     private(set) var results: [PaletteResult] = []
     var selectedIndex = 0
+    /// Bumped when the keyboard moves the selection; the list scrolls only for these,
+    /// never for hover, which would fight the user's own scrolling.
+    private(set) var keyboardSelectionVersion = 0
 
     nonisolated static let maximumResults = 60
 
@@ -46,6 +49,7 @@ final class PaletteController {
     func moveSelection(by delta: Int) {
         guard !results.isEmpty else { return }
         selectedIndex = (selectedIndex + delta + results.count) % results.count
+        keyboardSelectionVersion += 1
     }
 
     func activateSelection() {

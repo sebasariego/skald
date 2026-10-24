@@ -40,6 +40,17 @@ final class PaletteControllerTests: XCTestCase {
         XCTAssertTrue(palette.results.isEmpty)
     }
 
+    func testOnlyKeyboardMovesBumpTheScrollVersion() async {
+        let palette = PaletteController()
+        palette.present(placeholder: "x", candidates: candidates(["a", "b", "c"]))
+        await palette.waitForFilter()
+        let before = palette.keyboardSelectionVersion
+        palette.selectedIndex = 2 // hover
+        XCTAssertEqual(palette.keyboardSelectionVersion, before)
+        palette.moveSelection(by: 1)
+        XCTAssertEqual(palette.keyboardSelectionVersion, before + 1)
+    }
+
     func testDisabledCandidatesDoNotRun() async {
         var ran = false
         let palette = PaletteController()

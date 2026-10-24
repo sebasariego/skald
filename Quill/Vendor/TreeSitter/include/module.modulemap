@@ -1,0 +1,4 @@
+module TreeSitter {
+    header "tree_sitter/api.h"
+    export *
+}

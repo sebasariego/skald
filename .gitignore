@@ -1,0 +1,28 @@
+# Build output (kept inside the project folder on purpose)
+DerivedData/
+.build/
+build/
+
+# Xcode user state
+*.xcuserdata/
+*.xcuserdatad/
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved.bak
+
+# macOS
+.DS_Store
+
+# Secrets: never commit these
+.env
+.env.*
+*.pem
+*.p12
+*.mobileprovision
+
+# Upstream tree-sitter clones; the trimmed copies live in Quill/Vendor
+Vendor/upstream/

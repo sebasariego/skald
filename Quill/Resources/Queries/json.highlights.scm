@@ -1,0 +1,20 @@
+(pair
+  key: (_) @string.special.key)
+
+(string) @string
+
+(number) @number
+
+[
+  (null)
+  (true)
+  (false)
+] @constant.builtin
+
+(escape_sequence) @escape
+
+(comment) @comment
+
+; Added by Scripts/vendor-tree-sitter.sh: keys win over plain strings.
+(pair
+  key: (_) @string.special.key)

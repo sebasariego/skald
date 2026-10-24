@@ -12,7 +12,9 @@ OLD="$HOME/Library/Containers/dev.local.quill/Data/Library/Preferences/dev.local
 NEW_DIR="$HOME/Library/Containers/dev.local.skald/Data/Library/Preferences"
 NEW="$NEW_DIR/dev.local.skald.plist"
 
-if pgrep -xq Skald; then
+# Match the process by name and by executable path; a running Skald caches its
+# preferences, so an import underneath it would be ignored or overwritten.
+if pgrep -xq Skald || pgrep -qf "Skald.app/Contents/MacOS/Skald"; then
   echo "Quit Skald first, then run this again."; exit 1
 fi
 if [ ! -f "$OLD" ]; then
@@ -27,4 +29,8 @@ fi
 
 # Skald reads the Quill-era keys itself, so the plist can be imported as is.
 defaults import "${NEW%.plist}" "$OLD"
-echo "Copied Quill preferences into Skald's container. Launch Skald to pick them up."
+if defaults read "${NEW%.plist}" dev.local.quill.settings >/dev/null 2>&1; then
+  echo "Copied Quill preferences into Skald's container. Launch Skald to pick them up."
+else
+  echo "Import ran but the settings key is not readable back; check $NEW manually."; exit 1
+fi

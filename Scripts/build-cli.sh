@@ -29,27 +29,10 @@ grep -v xcrun_db "$OUT/build.log" || true
 
 test -x "$APP/Contents/MacOS/Skald"
 
-cat > "$APP/Contents/Info.plist" <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>CFBundleDevelopmentRegion</key><string>en</string>
-	<key>CFBundleDisplayName</key><string>Skald</string>
-	<key>CFBundleExecutable</key><string>Skald</string>
-	<key>CFBundleIdentifier</key><string>dev.local.skald</string>
-	<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-	<key>CFBundleName</key><string>Skald</string>
-	<key>CFBundlePackageType</key><string>APPL</string>
-	<key>CFBundleShortVersionString</key><string>0.1.0</string>
-	<key>CFBundleVersion</key><string>1</string>
-	<key>LSApplicationCategoryType</key><string>public.app-category.developer-tools</string>
-	<key>LSMinimumSystemVersion</key><string>14.0</string>
-	<key>NSHighResolutionCapable</key><true/>
-	<key>NSPrincipalClass</key><string>NSApplication</string>
-</dict>
-</plist>
-PLIST
+# The real Info.plist with Xcode's build variables substituted.
+sed -e 's/$(DEVELOPMENT_LANGUAGE)/en/' -e 's/$(EXECUTABLE_NAME)/Skald/' -e 's/$(PRODUCT_BUNDLE_IDENTIFIER)/dev.local.skald/' \
+    -e 's/$(PRODUCT_NAME)/Skald/' -e 's/$(PRODUCT_BUNDLE_PACKAGE_TYPE)/APPL/' -e 's/$(MARKETING_VERSION)/0.1.0/' \
+    -e 's/$(CURRENT_PROJECT_VERSION)/1/' -e 's/$(MACOSX_DEPLOYMENT_TARGET)/14.0/' Info.plist > "$APP/Contents/Info.plist"
 
 # Xcode's synchronized group copies loose resources flat into Contents/Resources; mirror that.
 find Skald/Resources -type f \( -name '*.json' -o -name '*.scm' \) -exec cp {} "$APP/Contents/Resources/" \;

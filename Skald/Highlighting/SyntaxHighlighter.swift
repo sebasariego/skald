@@ -134,6 +134,9 @@ final class SyntaxHighlighter {
         treeSnapshot = snapshot
         highlightedRange = nil
         highlightVisibleRange()
+        // The window may still be settling its layout right after open; one more pass on the
+        // next turn repaints if the viewport moved, and is a no-op otherwise.
+        scheduleHighlightPass()
     }
 
     /// Waits for any in-flight parse. Tests use this; the app never needs to.
@@ -205,7 +208,14 @@ final class SyntaxHighlighter {
         }
         hadStyledFonts = hasStyledFonts
         highlightedRange = target
-        textView.setNeedsDisplay(textView.visibleRect)
+
+        // TextKit 2 bakes rendering attributes into line fragments at layout time. Fragments
+        // laid out before this pass would keep their old colors in a layer-backed view until
+        // something relaid them out, so invalidate the painted range explicitly.
+        if let unionRange = textView.textRange(from: union) {
+            textLayoutManager.invalidateLayout(for: unionRange)
+        }
+        textView.needsDisplay = true
     }
 
     /// Viewport plus margin, clamped to the document. The range comes from the view's

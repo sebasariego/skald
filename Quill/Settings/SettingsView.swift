@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(Workspace.self) private var workspace
     @State private var families: [String] = []
+    @AppStorage("fontPicker.showsAllFonts") private var showsAllFonts = false
 
     var body: some View {
         @Bindable var workspace = workspace
@@ -13,6 +14,18 @@ struct SettingsView: View {
                         Text(theme.name).tag(theme.name)
                     }
                 }
+                VStack(alignment: .leading, spacing: 4) {
+                    Slider(value: $workspace.editorConfiguration.backgroundOpacity, in: EditorConfiguration.minimumBackgroundOpacity...1, step: 0.05) {
+                        Text("Background opacity")
+                    } minimumValueLabel: {
+                        Image(systemName: "circle.dotted")
+                    } maximumValueLabel: {
+                        Image(systemName: "circle.fill")
+                    }
+                    Text("\(Int((workspace.editorConfiguration.clampedBackgroundOpacity * 100).rounded()))% \u{2014} below 100% the desktop shows through the editor, blurred.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             Section("Font") {
                 Picker("Family", selection: fontFamilySelection) {
@@ -22,6 +35,8 @@ struct SettingsView: View {
                         Text(family).tag(family)
                     }
                 }
+                Toggle("Show all installed fonts, not only monospaced", isOn: $showsAllFonts)
+                    .onChange(of: showsAllFonts) { _, _ in reloadFamilies() }
                 Stepper(value: $workspace.editorConfiguration.fontSize, in: EditorConfiguration.minimumFontSize...EditorConfiguration.maximumFontSize, step: 1) {
                     LabeledContent("Size", value: "\(Int(workspace.editorConfiguration.fontSize)) pt")
                 }
@@ -42,7 +57,11 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 460)
         .fixedSize(horizontal: false, vertical: true)
-        .task { families = MonospacedFontCatalog.familyNames() }
+        .task { reloadFamilies() }
+    }
+
+    private func reloadFamilies() {
+        families = showsAllFonts ? MonospacedFontCatalog.allFamilyNames() : MonospacedFontCatalog.familyNames()
     }
 
     private var themeSelection: Binding<String> {

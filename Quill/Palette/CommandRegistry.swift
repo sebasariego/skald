@@ -26,6 +26,7 @@ enum CommandRegistry {
             Command(id: "view.fontSmaller", title: "View: Decrease Font Size", shortcut: "\u{2318}-") { workspace.adjustFontSize(by: -1) },
             Command(id: "view.fontReset", title: "View: Reset Font Size", shortcut: "\u{2318}0") { workspace.resetFontSize() },
             Command(id: "settings.open", title: "Preferences: Open Settings", shortcut: "\u{2318},") { workspace.showSettings() },
+            Command(id: "settings.font", title: "Preferences: Font and Appearance\u{2026}") { workspace.showSettings() },
         ]
         for theme in workspace.availableThemes {
             commands.append(Command(id: "theme.\(theme.name)", title: "Preferences: Color Theme: \(theme.name)", isEnabled: theme != workspace.theme) {

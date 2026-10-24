@@ -56,6 +56,7 @@ struct QuillCommands: Commands {
                 .keyboardShortcut("-", modifiers: [.command])
             Button("Reset Font Size") { workspace.resetFontSize() }
                 .keyboardShortcut("0", modifiers: [.command])
+            Button("Font and Appearance\u{2026}") { workspace.showSettings() }
         }
         CommandGroup(before: .windowList) {
             Button("Next Tab") { workspace.selectAdjacentTab(offset: 1) }

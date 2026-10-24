@@ -11,9 +11,18 @@ struct EditorConfiguration: Equatable, Codable {
     var showLineNumbers: Bool = true
     var highlightCurrentLine: Bool = true
     var trimTrailingWhitespaceOnSave: Bool = false
+    /// 1 is a solid editor; lower values let the blurred desktop show through.
+    var backgroundOpacity: Double = 1.0
 
     static let minimumFontSize: CGFloat = 8
     static let maximumFontSize: CGFloat = 48
+    static let minimumBackgroundOpacity: Double = 0.3
+
+    var clampedBackgroundOpacity: Double {
+        min(1, max(Self.minimumBackgroundOpacity, backgroundOpacity))
+    }
+
+    var isTranslucent: Bool { clampedBackgroundOpacity < 0.999 }
 
     var font: NSFont {
         if let fontName, let named = NSFont(name: fontName, size: fontSize) {

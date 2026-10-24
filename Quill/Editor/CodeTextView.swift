@@ -123,7 +123,7 @@ final class CodeTextView: NSTextView {
         if needsAttributes {
             applyBaseAttributes()
         }
-        if themeChanged || typingAttributes[.font] == nil {
+        if themeChanged || typingAttributes[.font] == nil || previous.backgroundOpacity != configuration.backgroundOpacity {
             applyThemeColors()
         }
         if previous.softWrap != configuration.softWrap || !didConfigureWrap {
@@ -157,8 +157,10 @@ final class CodeTextView: NSTextView {
 
     private func applyThemeColors() {
         let colors = theme.colors
-        backgroundColor = colors.editorBackground
-        enclosingScrollView?.backgroundColor = colors.editorBackground
+        let background = colors.editorBackground.withAlphaComponent(configuration.clampedBackgroundOpacity)
+        backgroundColor = background
+        enclosingScrollView?.backgroundColor = background
+        enclosingScrollView?.drawsBackground = !configuration.isTranslucent
         textColor = colors.editorForeground
         insertionPointColor = colors.cursor
         selectedTextAttributes = [.backgroundColor: colors.selectionBackground]

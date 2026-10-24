@@ -96,6 +96,22 @@ final class EditorSmokeTests: XCTestCase {
         assertStillTextKit2(textView)
     }
 
+    func testBackgroundOpacityAppliesToEditorAndGutter() {
+        var configuration = EditorConfiguration()
+        configuration.backgroundOpacity = 0.6
+        let (scrollView, textView, _) = makeEditor(text: "abc", configuration: configuration)
+        XCTAssertEqual(textView.backgroundColor.alphaComponent, 0.6, accuracy: 0.001)
+        XCTAssertFalse(scrollView.drawsBackground)
+        configuration.backgroundOpacity = 0.1 // below the floor
+        textView.apply(configuration)
+        XCTAssertEqual(textView.backgroundColor.alphaComponent, EditorConfiguration.minimumBackgroundOpacity, accuracy: 0.001)
+        configuration.backgroundOpacity = 1
+        textView.apply(configuration)
+        XCTAssertEqual(textView.backgroundColor.alphaComponent, 1, accuracy: 0.001)
+        XCTAssertTrue(scrollView.drawsBackground)
+        assertStillTextKit2(textView)
+    }
+
     /// Any `layoutManager` access downgrades the view to TextKit 1; check after exercising it.
     private func assertStillTextKit2(_ textView: CodeTextView, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertNotNil(textView.textLayoutManager, "view fell back to TextKit 1", file: file, line: line)

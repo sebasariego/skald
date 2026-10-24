@@ -15,6 +15,7 @@ struct QuillApp: App {
                 .frame(minWidth: 720, minHeight: 440)
         }
         .defaultSize(width: 1120, height: 740)
+        .windowToolbarStyle(.unified(showsTitle: true))
         .commands {
             QuillCommands(workspace: appDelegate.workspace)
         }

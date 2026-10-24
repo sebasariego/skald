@@ -27,14 +27,30 @@ struct FileTreeRow: View {
         }
     }
 
+    /// Folders get a full-brightness glyph and a slightly heavier name so they read at a
+    /// glance; files keep thin grey glyphs. Monochrome throughout, no accent color.
     private var label: some View {
-        HStack(spacing: 6) {
-            Image(nsImage: FileIconProvider.icon(for: node.url))
-                .resizable()
-                .frame(width: 16, height: 16)
-            Text(node.name)
-                .lineLimit(1)
-                .truncationMode(.middle)
+        HStack(spacing: 7) {
+            if node.isDirectory {
+                Image(systemName: node.isExpanded ? FileIconProvider.openFolderSymbol : FileIconProvider.folderSymbol)
+                    .symbolRenderingMode(.monochrome)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .frame(width: 18, alignment: .center)
+                Text(node.name)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            } else {
+                Image(systemName: FileIconProvider.symbolName(for: node.url, isDirectory: false))
+                    .symbolRenderingMode(.monochrome)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 18, alignment: .center)
+                Text(node.name)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
         }
     }
 }

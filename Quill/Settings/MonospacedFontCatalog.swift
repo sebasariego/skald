@@ -14,6 +14,11 @@ enum MonospacedFontCatalog {
         return families.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
     }
 
+    /// Every installed family, for people who want a proportional font in the editor.
+    static func allFamilyNames() -> [String] {
+        NSFontManager.shared.availableFontFamilies.sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+    }
+
     /// Regular-weight member of a family, or nil for the system option.
     static func fontName(forFamily family: String) -> String? {
         guard family != systemOption else { return nil }

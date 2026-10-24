@@ -6,6 +6,7 @@ final class GutterView: NSRulerView {
     private weak var textView: CodeTextView?
     private var font = NSFont.monospacedDigitSystemFont(ofSize: 13, weight: .regular)
     private var colors = ThemeLoader.fallbackTheme.colors
+    private var backgroundOpacity = 1.0
     private var lastDigitCount = 0
 
     init(scrollView: NSScrollView, textView: CodeTextView) {
@@ -26,6 +27,7 @@ final class GutterView: NSRulerView {
     func apply(_ configuration: EditorConfiguration, theme: Theme) {
         font = NSFont.monospacedDigitSystemFont(ofSize: configuration.fontSize, weight: .regular)
         colors = theme.colors
+        backgroundOpacity = configuration.clampedBackgroundOpacity
         updateThickness(force: true)
         needsDisplay = true
     }
@@ -47,7 +49,7 @@ final class GutterView: NSRulerView {
         context.saveGraphicsState()
         defer { context.restoreGraphicsState() }
         NSBezierPath(rect: bounds).addClip()
-        colors.editorBackground.setFill()
+        colors.editorBackground.withAlphaComponent(backgroundOpacity).setFill()
         bounds.intersection(dirtyRect).fill()
         drawHashMarksAndLabels(in: dirtyRect)
     }

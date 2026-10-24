@@ -67,6 +67,67 @@ final class TreeSitterParserTests: XCTestCase {
         XCTAssertTrue(markdownFound["text.title"]?.first?.contains("Title") ?? false, "\(markdownFound)")
     }
 
+    func testBashHighlights() async throws {
+        let source = "#!/bin/zsh\nif [ -f \"$HOME/x\" ]; then\n  echo hello # note\nfi\n"
+        let found = captures(try await spans("bash", source), in: source)
+        XCTAssertTrue(found["keyword"]?.contains("if") ?? false, "\(found)")
+        XCTAssertTrue(found["comment"]?.contains("# note") ?? false, "\(found)")
+        XCTAssertTrue(found["function"]?.contains("echo") ?? false, "\(found)")
+        XCTAssertTrue((found["property"] ?? []).contains("HOME") || (found["variable"] ?? []).contains("HOME"), "\(found)")
+    }
+
+    func testHTMLInjectsJavaScriptAndCSS() async throws {
+        let source = "<html><head><style>body { color: red; }</style></head>\n<body class=\"a\"><script>let x = 1;</script></body></html>\n"
+        let found = captures(try await spans("html", source), in: source)
+        XCTAssertTrue(found["tag"]?.contains("body") ?? false, "\(found)")
+        XCTAssertTrue(found["attribute"]?.contains("class") ?? false, "\(found)")
+        XCTAssertTrue(found["keyword"]?.contains("let") ?? false, "javascript inside <script>: \(found)")
+        XCTAssertTrue(found["property"]?.contains("color") ?? false, "css inside <style>: \(found)")
+    }
+
+    func testXMLAndSVG() async throws {
+        let source = "<?xml version=\"1.0\"?>\n<svg width=\"10\"><!-- c --><rect x=\"1\"/></svg>\n"
+        let found = captures(try await spans("xml", source), in: source)
+        XCTAssertTrue(found["tag"]?.contains("svg") ?? false, "\(found)")
+        XCTAssertTrue((found["attribute"] ?? found["property"])?.contains("width") ?? false, "\(found)")
+        XCTAssertTrue(found["comment"]?.contains("<!-- c -->") ?? false, "\(found)")
+        XCTAssertEqual(LanguageRegistry.language(for: URL(fileURLWithPath: "/tmp/icon.svg"))?.id, "xml")
+    }
+
+    func testJavaScriptWithJSX() async throws {
+        let source = "import React from 'react';\nexport function App({ name }) {\n  const n = 42; // hi\n  return <div className=\"x\">{name}</div>;\n}\n"
+        let found = captures(try await spans("javascript", source), in: source)
+        XCTAssertTrue(found["keyword"]?.contains("import") ?? false, "\(found)")
+        XCTAssertTrue((found["function"] ?? []).contains("App") || (found["constructor"] ?? []).contains("App"), "\(found)")
+        XCTAssertEqual(found["number"], ["42"])
+        XCTAssertEqual(found["comment"], ["// hi"])
+        XCTAssertTrue(found["tag"]?.contains("div") ?? false, "jsx tags: \(found)")
+        XCTAssertEqual(LanguageRegistry.language(for: URL(fileURLWithPath: "/tmp/a.jsx"))?.id, "javascript")
+    }
+
+    func testTypeScriptAndTSX() async throws {
+        let ts = "interface User { id: number; name?: string }\nconst greet = (u: User): string => `hi ${u.name}`;\n"
+        let found = captures(try await spans("typescript", ts), in: ts)
+        XCTAssertTrue(found["keyword"]?.contains("interface") ?? false, "\(found)")
+        XCTAssertTrue(found["type"]?.contains("User") ?? false, "\(found)")
+        XCTAssertTrue(found["type.builtin"]?.contains("number") ?? false, "\(found)")
+        XCTAssertTrue(found["string"]?.contains("`hi ${u.name}`") ?? false, "\(found)")
+
+        let tsx = "export const C = (p: { title: string }) => <h1 id=\"t\">{p.title}</h1>;\n"
+        let foundTSX = captures(try await spans("tsx", tsx), in: tsx)
+        XCTAssertTrue(foundTSX["tag"]?.contains("h1") ?? false, "\(foundTSX)")
+        XCTAssertTrue(foundTSX["type.builtin"]?.contains("string") ?? false, "\(foundTSX)")
+    }
+
+    func testCSS() async throws {
+        let source = ".card > a:hover { color: #fff; margin: 4px 0; }\n"
+        let found = captures(try await spans("css", source), in: source)
+        XCTAssertTrue(found["property"]?.contains("color") ?? false, "\(found)")
+        XCTAssertTrue(found["tag"]?.contains("a") ?? false, "\(found)")
+        XCTAssertEqual(found["string.special"], ["#fff"], "\(found)")
+        XCTAssertTrue(found["number"]?.contains("4px") ?? false, "\(found)")
+    }
+
     func testMarkdownInjectsInlineAndFencedCode() async throws {
         let source = "# Title\n\nSome *soft* and **loud** text with `code`.\n\n```swift\nlet a = 1\n```\n\n```python\ndef f(): pass\n```\n"
         let found = captures(try await spans("markdown", source), in: source)

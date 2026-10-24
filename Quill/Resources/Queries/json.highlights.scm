@@ -1,3 +1,4 @@
+; --- from tree-sitter-json/queries/highlights.scm
 (pair
   key: (_) @string.special.key)
 
@@ -14,6 +15,7 @@
 (escape_sequence) @escape
 
 (comment) @comment
+
 
 ; Added by Scripts/vendor-tree-sitter.sh: keys win over plain strings.
 (pair

@@ -8,7 +8,7 @@ OBJ_DIR="$1"
 mkdir -p "$OBJ_DIR"
 SDK="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
 [ -d Quill/Vendor/TreeSitter/src ] || exit 0
-for src in Quill/Vendor/TreeSitter/src/*.c Quill/Vendor/Grammars/*/*.c; do
+for src in Quill/Vendor/TreeSitter/src/*.c $(find Quill/Vendor/Grammars -name '*.c' | sort); do
   obj="$OBJ_DIR/$(echo "$src" | tr '/' '_' | sed 's/\.c$/.o/')"
   if [ ! -f "$obj" ] || [ "$src" -nt "$obj" ]; then
     clang -c -std=gnu11 -O2 -g -isysroot "$SDK" -target arm64-apple-macosx14.0 \

@@ -1,3 +1,4 @@
+; --- from tree-sitter-swift/queries/highlights.scm
 [
   "."
   ";"
@@ -337,3 +338,4 @@
     "<"
     ">"
   ] @punctuation.bracket)
+

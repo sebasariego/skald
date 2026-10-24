@@ -16,11 +16,21 @@ enum TreeSitterSupport {
         "markdown": { tree_sitter_markdown() },
         "markdown_inline": { tree_sitter_markdown_inline() },
         "yaml": { tree_sitter_yaml() },
+        "bash": { tree_sitter_bash() },
+        "html": { tree_sitter_html() },
+        "css": { tree_sitter_css() },
+        "xml": { tree_sitter_xml() },
+        "javascript": { tree_sitter_javascript() },
+        "typescript": { tree_sitter_typescript() },
+        "tsx": { tree_sitter_tsx() },
     ]
 
-    /// Names used by injection queries that differ from our language ids.
+    /// Names used by injection queries and fence info strings that differ from our language ids.
     private static let injectionAliases: [String: String] = [
         "md": "markdown", "py": "python", "yml": "yaml",
+        "sh": "bash", "shell": "bash", "zsh": "bash", "console": "bash",
+        "js": "javascript", "jsx": "javascript", "mjs": "javascript", "node": "javascript",
+        "ts": "typescript", "svg": "xml", "xhtml": "html", "htm": "html",
     ]
 
     /// Compiled queries are shared by every document in the same language.

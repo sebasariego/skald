@@ -12,6 +12,14 @@ enum LanguageRegistry {
         // Injection-only: Markdown paragraphs hand their text to this grammar. No file extension.
         LanguageDefinition(id: "markdown_inline", displayName: "Markdown", fileExtensions: [], lineComment: nil),
         LanguageDefinition(id: "yaml", displayName: "YAML", fileExtensions: ["yml", "yaml"], lineComment: "#"),
+        LanguageDefinition(id: "bash", displayName: "Shell", fileExtensions: ["sh", "bash", "zsh", "command"],
+                           fileNames: [".bashrc", ".bash_profile", ".zshrc", ".zprofile", ".zshenv", ".profile"], lineComment: "#"),
+        LanguageDefinition(id: "html", displayName: "HTML", fileExtensions: ["html", "htm", "xhtml"], lineComment: nil),
+        LanguageDefinition(id: "css", displayName: "CSS", fileExtensions: ["css"], lineComment: nil),
+        LanguageDefinition(id: "xml", displayName: "XML", fileExtensions: ["xml", "svg", "plist", "xsl", "xslt", "xib", "storyboard", "xcscheme", "entitlements"], lineComment: nil),
+        LanguageDefinition(id: "javascript", displayName: "JavaScript", fileExtensions: ["js", "mjs", "cjs", "jsx"], lineComment: "//"),
+        LanguageDefinition(id: "typescript", displayName: "TypeScript", fileExtensions: ["ts", "mts", "cts"], lineComment: "//"),
+        LanguageDefinition(id: "tsx", displayName: "TSX", fileExtensions: ["tsx"], lineComment: "//"),
     ]
 
     /// Creates a parser for a language, or returns nil when none is available.

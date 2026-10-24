@@ -1,3 +1,4 @@
+; --- from tree-sitter-markdown/tree-sitter-markdown/queries/highlights.scm
 ;From nvim-treesitter/nvim-treesitter
 (atx_heading
   (inline) @text.title)
@@ -45,3 +46,4 @@
 ] @punctuation.special
 
 (backslash_escape) @string.escape
+

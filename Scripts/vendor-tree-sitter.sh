@@ -39,14 +39,26 @@ module TreeSitter {
 }
 MAP
 
-# --- Grammars: name|upstream dir containing src/ and queries/|C symbol
+# --- Grammars. Fields (| separated): name | grammar dir under upstream | C symbol |
+#     shared header dir (for repos whose scanner includes ../../common/scanner.h) |
+#     highlight query files (+ separated, in the CLI's order; later patterns win) |
+#     injections query file. Empty fields take the defaults.
 GRAMMARS=(
-  "swift|tree-sitter-swift|tree_sitter_swift"
-  "python|tree-sitter-python|tree_sitter_python"
-  "json|tree-sitter-json|tree_sitter_json"
-  "markdown|tree-sitter-markdown/tree-sitter-markdown|tree_sitter_markdown"
-  "markdown_inline|tree-sitter-markdown/tree-sitter-markdown-inline|tree_sitter_markdown_inline"
-  "yaml|tree-sitter-yaml|tree_sitter_yaml"
+  "swift|tree-sitter-swift|tree_sitter_swift|||"
+  "python|tree-sitter-python|tree_sitter_python|||"
+  "json|tree-sitter-json|tree_sitter_json|||"
+  "markdown|tree-sitter-markdown/tree-sitter-markdown|tree_sitter_markdown|||"
+  "markdown_inline|tree-sitter-markdown/tree-sitter-markdown-inline|tree_sitter_markdown_inline|||"
+  "yaml|tree-sitter-yaml|tree_sitter_yaml|||"
+  "bash|tree-sitter-bash|tree_sitter_bash|||"
+  "html|tree-sitter-html|tree_sitter_html|||"
+  "css|tree-sitter-css|tree_sitter_css|||"
+  "xml|tree-sitter-xml/xml|tree_sitter_xml|tree-sitter-xml/common|tree-sitter-xml/queries/xml/highlights.scm|"
+  "javascript|tree-sitter-javascript|tree_sitter_javascript||tree-sitter-javascript/queries/highlights.scm+tree-sitter-javascript/queries/highlights-jsx.scm+tree-sitter-javascript/queries/highlights-params.scm|"
+  "typescript|tree-sitter-typescript/typescript|tree_sitter_typescript|tree-sitter-typescript/common|tree-sitter-typescript/queries/highlights.scm+tree-sitter-javascript/queries/highlights.scm|tree-sitter-javascript/queries/injections.scm"
+  # Later patterns win, so JSX goes last (upstream's tree-sitter.json lists it before the
+  # general JavaScript file, which would turn every JSX tag back into a variable).
+  "tsx|tree-sitter-typescript/tsx|tree_sitter_tsx|tree-sitter-typescript/common|tree-sitter-typescript/queries/highlights.scm+tree-sitter-javascript/queries/highlights.scm+tree-sitter-javascript/queries/highlights-jsx.scm|tree-sitter-javascript/queries/injections.scm"
 )
 
 HEADER="$GRAMMAR_DST/include/grammars.h"
@@ -65,10 +77,23 @@ MIN_VERSION=$(grep -E '#define TREE_SITTER_MIN_COMPATIBLE_LANGUAGE_VERSION' "$RU
 echo "runtime language version: $API_VERSION (min compatible $MIN_VERSION)"
 
 for entry in "${GRAMMARS[@]}"; do
-  name="${entry%%|*}"; rest="${entry#*|}"; dir="${rest%%|*}"; symbol="${rest#*|}"
+  IFS='|' read -r name dir symbol common highlights injections <<< "$entry"
   src="$UP/$dir/src"
   require "$src/parser.c"
-  dst="$GRAMMAR_DST/$name"
+  [ -n "$highlights" ] || highlights="$dir/queries/highlights.scm"
+  [ -n "$injections" ] || injections="$dir/queries/injections.scm"
+
+  # Repos with a shared header keep their "<grammar>/src" shape so "../../common" resolves.
+  if [ -n "$common" ]; then
+    dst="$GRAMMAR_DST/$name/$(basename "$dir")/src"
+    mkdir -p "$GRAMMAR_DST/$name/common/tree_sitter"
+    cp "$UP/$common"/*.h "$GRAMMAR_DST/$name/common/"
+    # The shared header includes "tree_sitter/parser.h"; upstream builds with -Isrc.
+    # Placing the headers beside it lets the quoted include resolve without flags.
+    cp "$src"/tree_sitter/*.h "$GRAMMAR_DST/$name/common/tree_sitter/"
+  else
+    dst="$GRAMMAR_DST/$name"
+  fi
   mkdir -p "$dst"
   # Rename the two conventional files so object names never collide across grammars.
   cp "$src/parser.c" "$dst/${name}_parser.c"
@@ -84,18 +109,24 @@ for entry in "${GRAMMARS[@]}"; do
   done
   mkdir -p "$dst/tree_sitter"
   cp "$src"/tree_sitter/*.h "$dst/tree_sitter/"
-  # Highlight query and license.
-  queries="$UP/$dir/queries/highlights.scm"
-  require "$queries"
-  cp "$queries" "$QUERY_DST/${name}.highlights.scm"
+
+  # Highlight query: the listed files concatenated in order.
+  : > "$QUERY_DST/${name}.highlights.scm"
+  IFS='+' read -rA parts <<< "$highlights"
+  for part in "${parts[@]}"; do
+    require "$UP/$part"
+    { echo "; --- from $part"; cat "$UP/$part"; echo; } >> "$QUERY_DST/${name}.highlights.scm"
+  done
   if [ "$name" = "json" ]; then
     # Later patterns win. Upstream lists the key pattern before "(string) @string",
     # which would turn every key into a plain string; re-assert it at the end.
     printf '\n; Added by Scripts/vendor-tree-sitter.sh: keys win over plain strings.\n(pair\n  key: (_) @string.special.key)\n' >> "$QUERY_DST/${name}.highlights.scm"
   fi
   # Injection query (which nodes hand off to another grammar), when the grammar has one.
-  injections="$UP/$dir/queries/injections.scm"
-  [ -f "$injections" ] && cp "$injections" "$QUERY_DST/${name}.injections.scm"
+  if [ -f "$UP/$injections" ]; then
+    cp "$UP/$injections" "$QUERY_DST/${name}.injections.scm"
+  fi
+
   repo_root="$UP/${dir%%/*}"
   [ -f "$repo_root/LICENSE" ] && cp "$repo_root/LICENSE" "$LICENSE_DST/${name}-LICENSE.txt"
   [ -f "$repo_root/LICENSE.md" ] && cp "$repo_root/LICENSE.md" "$LICENSE_DST/${name}-LICENSE.txt"

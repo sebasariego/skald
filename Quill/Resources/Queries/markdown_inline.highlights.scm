@@ -1,3 +1,4 @@
+; --- from tree-sitter-markdown/tree-sitter-markdown-inline/queries/highlights.scm
 ; From nvim-treesitter/nvim-treesitter
 [
   (code_span)
@@ -54,3 +55,4 @@
 
 ; NOTE: extension not enabled by default
 ; (wiki_link ["[" "|" "]"] @punctuation.delimiter)
+

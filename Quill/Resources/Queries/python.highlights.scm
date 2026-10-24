@@ -1,3 +1,4 @@
+; --- from tree-sitter-python/queries/highlights.scm
 ; Identifier naming conventions
 
 (identifier) @variable
@@ -135,3 +136,4 @@
   "match"
   "case"
 ] @keyword
+

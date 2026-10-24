@@ -1,3 +1,4 @@
+; --- from tree-sitter-yaml/queries/highlights.scm
 (boolean_scalar) @boolean
 
 (null_scalar) @constant.builtin
@@ -77,3 +78,4 @@
   "---"
   "..."
 ] @punctuation.special
+

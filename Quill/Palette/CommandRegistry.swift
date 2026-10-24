@@ -15,6 +15,7 @@ enum CommandRegistry {
             Command(id: "file.saveAs", title: "File: Save As\u{2026}", shortcut: "\u{21E7}\u{2318}S", isEnabled: hasDocument) { Task { await workspace.saveAs() } },
             Command(id: "file.closeTab", title: "File: Close Tab", shortcut: "\u{2318}W", isEnabled: hasDocument) { workspace.closeSelectedTab() },
             Command(id: "file.quickOpen", title: "Go to File\u{2026}", shortcut: "\u{2318}P") { workspace.showQuickOpen() },
+            Command(id: "file.terminal", title: "Open in Terminal", shortcut: "\u{2303}`") { workspace.openInTerminal() },
             Command(id: "edit.find", title: "Find", shortcut: "\u{2318}F", isEnabled: hasDocument) { workspace.showFind(withReplace: false) },
             Command(id: "edit.replace", title: "Find and Replace", shortcut: "\u{2325}\u{2318}F", isEnabled: hasDocument) { workspace.showFind(withReplace: true) },
             Command(id: "view.softWrap", title: "View: \(configuration.softWrap ? "Disable" : "Enable") Soft Wrap", shortcut: "\u{2325}Z") { workspace.toggleSoftWrap() },

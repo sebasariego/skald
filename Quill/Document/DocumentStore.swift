@@ -80,6 +80,13 @@ final class DocumentStore {
         document.replaceText(with: loaded.text, encoding: loaded.encoding, lineEnding: loaded.lineEnding, modificationDate: loaded.modificationDate, lineIndex: loaded.lineIndex)
     }
 
+    /// Moves `document` to `index` in the order (clamped), counting positions after removal.
+    func move(_ document: Document, toIndex index: Int) {
+        guard let from = documents.firstIndex(where: { $0 === document }) else { return }
+        let moved = documents.remove(at: from)
+        documents.insert(moved, at: max(0, min(index, documents.count)))
+    }
+
     func close(_ document: Document) {
         document.stopMonitoring()
         documents.removeAll { $0.id == document.id }

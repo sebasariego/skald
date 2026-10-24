@@ -15,6 +15,10 @@ final class Workspace {
     @ObservationIgnored private let settingsStore: SettingsStore
     @ObservationIgnored private let sessionStore: SessionStore
     @ObservationIgnored private var isRestoringSession = false
+    /// Bundle identifier of the preferred terminal, or nil for automatic.
+    var terminalID: String? {
+        didSet { if terminalID != oldValue { persistSettings() } }
+    }
     var editorConfiguration: EditorConfiguration {
         didSet { if editorConfiguration != oldValue { persistSettings() } }
     }
@@ -59,6 +63,7 @@ final class Workspace {
         let bundled = themes ?? ThemeLoader.bundledThemes()
         availableThemes = bundled
         editorConfiguration = saved.editor
+        terminalID = saved.terminalID
         theme = bundled.first { $0.name == saved.themeName }
             ?? bundled.first { $0.name == "Quill Dark" }
             ?? bundled.first
@@ -144,7 +149,7 @@ final class Workspace {
     }
 
     private func persistSettings() {
-        settingsStore.save(SettingsStore.Snapshot(editor: editorConfiguration, themeName: theme.name))
+        settingsStore.save(SettingsStore.Snapshot(editor: editorConfiguration, themeName: theme.name, terminalID: terminalID))
     }
 
     func selectTheme(named name: String) {
@@ -300,6 +305,32 @@ final class Workspace {
         guard !documents.isEmpty else { return }
         let current = documents.firstIndex { $0.id == selectedDocumentID } ?? 0
         selectedDocumentID = documents[(current + offset + documents.count) % documents.count].id
+    }
+
+    /// Drag-reorder: places the tab at `index` within the current order.
+    func moveTab(_ id: Document.ID, toIndex index: Int) {
+        guard let document = documents.document(withID: id) else { return }
+        documents.move(document, toIndex: index)
+        saveSession()
+    }
+
+    // MARK: Terminal
+
+    /// Folder the terminal should open in: the open folder, else the current file's folder, else home.
+    var terminalDirectory: URL {
+        if let root = folderTree.root?.url { return root }
+        if let url = selectedDocument?.url { return url.deletingLastPathComponent() }
+        return FileManager.default.homeDirectoryForCurrentUser
+    }
+
+    func openInTerminal() {
+        guard let terminal = ExternalTerminal.resolve(preferredID: terminalID) else {
+            presentedError = PresentedError(title: "No terminal found", message: "Install Ghostty, iTerm or another terminal, or check Terminal.app is present.")
+            return
+        }
+        terminal.open(directory: terminalDirectory) { [weak self] error in
+            if let error { self?.present(error, title: "Couldn't open \(terminal.name)") }
+        }
     }
 
     func closeSelectedTab() {

@@ -48,6 +48,18 @@ struct SettingsView: View {
                 Toggle("Insert spaces when pressing Tab", isOn: $workspace.editorConfiguration.insertSpaces)
                 Toggle("Trim trailing whitespace on save", isOn: $workspace.editorConfiguration.trimTrailingWhitespaceOnSave)
             }
+            Section("Terminal") {
+                Picker("Open in Terminal uses", selection: terminalSelection) {
+                    Text(ExternalTerminal.automatic.name).tag(ExternalTerminal.automatic.id)
+                    Divider()
+                    ForEach(ExternalTerminal.installed()) { terminal in
+                        Text(terminal.name).tag(terminal.id)
+                    }
+                }
+                Text("Opens a new window in the current file's folder. Shortcut: \u{2303}` (Control and backtick).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Section("Display") {
                 Toggle("Soft wrap long lines", isOn: $workspace.editorConfiguration.softWrap)
                 Toggle("Show line numbers", isOn: $workspace.editorConfiguration.showLineNumbers)
@@ -68,6 +80,13 @@ struct SettingsView: View {
         Binding(
             get: { workspace.theme.name },
             set: { workspace.selectTheme(named: $0) }
+        )
+    }
+
+    private var terminalSelection: Binding<String> {
+        Binding(
+            get: { workspace.terminalID ?? ExternalTerminal.automatic.id },
+            set: { workspace.terminalID = $0 == ExternalTerminal.automatic.id ? nil : $0 }
         )
     }
 

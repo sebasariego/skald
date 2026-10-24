@@ -14,6 +14,9 @@ struct QuillCommands: Commands {
             Button("Open Folder\u{2026}") { workspace.openFolderPanel() }
                 .keyboardShortcut("o", modifiers: [.command, .shift])
             Divider()
+            Button("Open in Terminal") { workspace.openInTerminal() }
+                .keyboardShortcut("`", modifiers: [.control])
+            Divider()
             // Always enabled: a disabled item would let Cmd+W fall through to the system "Close" window item.
             Button("Close Tab") { workspace.closeSelectedTab() }
                 .keyboardShortcut("w")

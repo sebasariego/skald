@@ -28,14 +28,38 @@ struct TabItemView: View {
                 .foregroundStyle(isSelected ? .primary : .secondary)
         }
         .padding(.horizontal, 10)
-        .frame(height: 28)
-        .background(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(Color.primary.opacity(isSelected ? 0.12 : (isHovering ? 0.06 : 0)))
-        )
+        .frame(height: 26)
+        .modifier(TabPillBackground(isSelected: isSelected, isHovering: isHovering))
         .contentShape(Rectangle())
         .onTapGesture(perform: select)
+        .overlay(MiddleClickCatcher(action: close))
         .onHover { isHovering = $0 }
         .animation(.easeOut(duration: 0.12), value: isHovering)
+    }
+}
+
+/// Liquid Glass pill on macOS 26 and later; a tinted material pill before that.
+private struct TabPillBackground: ViewModifier {
+    let isSelected: Bool
+    let isHovering: Bool
+
+    func body(content: Content) -> some View {
+        if #available(macOS 26.0, *) {
+            if isSelected {
+                // Plain glass: the interactive variant scales on hover, which reads as a zoom.
+                content.glassEffect(.regular.tint(Color.primary.opacity(0.10)), in: .rect(cornerRadius: 8, style: .continuous))
+            } else {
+                // Hover is a flat tint, not glass, so nothing morphs between neighboring pills.
+                content.background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.primary.opacity(isHovering ? 0.06 : 0))
+                )
+            }
+        } else {
+            content.background(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color.primary.opacity(isSelected ? 0.12 : (isHovering ? 0.06 : 0)))
+            )
+        }
     }
 }

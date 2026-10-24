@@ -6,8 +6,10 @@ struct SettingsStore {
     struct Snapshot: Codable, Equatable {
         var editor: EditorConfiguration
         var themeName: String?
+        /// Bundle identifier of the preferred terminal app; nil or "automatic" picks the first installed.
+        var terminalID: String?
 
-        static let `default` = Snapshot(editor: EditorConfiguration(), themeName: nil)
+        static let `default` = Snapshot(editor: EditorConfiguration(), themeName: nil, terminalID: nil)
     }
 
     static let key = "dev.local.quill.settings"

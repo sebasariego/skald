@@ -23,6 +23,10 @@ struct MainWindowView: View {
                 Button { workspace.openFolderPanel() } label: { Label("Open Folder", systemImage: "folder.badge.plus") }
                     .help("Open Folder (\u{21E7}\u{2318}O)")
             }
+            ToolbarItem(id: "terminal", placement: .primaryAction) {
+                Button { workspace.openInTerminal() } label: { Label("Open in Terminal", systemImage: "terminal") }
+                    .help("Open in Terminal (\u{2303}`)")
+            }
             ToolbarItem(id: "spacer1", placement: .primaryAction, showsByDefault: true) {
                 Spacer().frame(width: 8)
             }
